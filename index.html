@@ -53,14 +53,16 @@
     <h3>Fear & Greed</h3>
     <div id="sentiment" class="value">30</div>
   </div>
-</div><div id="status" class="status">⏳ Loading...</div><script>
+<script>
 async function loadData() {
   try {
-    const dax = await fetch("https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EGDAXI")
+    const dax = await fetch("https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EGDAXI")
       .then(r => r.json());
-    const vix = await fetch("https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX")
+
+    const vix = await fetch("https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX")
       .then(r => r.json());
-    const hyg = await fetch("https://query1.finance.yahoo.com/v7/finance/quote?symbols=HYG")
+
+    const hyg = await fetch("https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v7/finance/quote?symbols=HYG")
       .then(r => r.json());
 
     let daxVal = dax.quoteResponse.result[0].regularMarketPrice;
@@ -101,5 +103,4 @@ async function loadData() {
 
 loadData();
 setInterval(loadData, 60000);
-</script></body>
-</html>
+</script>
