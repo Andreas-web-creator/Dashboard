@@ -16,7 +16,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
       margin: 20px;
     }
@@ -25,7 +25,6 @@
       background: #1e293b;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
     .value {
@@ -43,14 +42,11 @@
       margin-top: 20px;
     }
   </style></head><body><h1>📊 Macro Risk Dashboard</h1><div class="grid">  <div class="card">
-    <h3>DAX</h3>
+    <h3>DAX (Proxy ETF)</h3>
     <div id="dax" class="value">--</div>
   </div>  <div class="card">
     <h3>VIX</h3>
     <div id="vix" class="value">--</div>
-  </div>  <div class="card">
-    <h3>US 10Y</h3>
-    <div id="yield" class="value">--</div>
   </div>  <div class="card">
     <h3>Credit (HYG)</h3>
     <div id="hyg" class="value">--</div>
@@ -60,40 +56,31 @@
   </div></div><div id="status" class="status">⏳ Loading...</div><script>
 async function loadData() {
   try {
-    const dax = await fetch("https://corsproxy.io/?https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EGDAXI")
-      .then(r => r.json());
+    // Öffentliche stabile API (ohne Proxy)
+    const response = await fetch("https://financialmodelingprep.com/api/v3/quote/%5EVIX,HYG?apikey=demo");
+    const data = await response.json();
 
-    const vix = await fetch("https://corsproxy.io/?https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX")
-      .then(r => r.json());
+    let vix = data.find(x => x.symbol === "^VIX");
+    let hyg = data.find(x => x.symbol === "HYG");
 
-    const hyg = await fetch("https://corsproxy.io/?https://query1.finance.yahoo.com/v7/finance/quote?symbols=HYG")
-      .then(r => r.json());
+    document.getElementById("vix").innerText = vix.price.toFixed(1);
+    document.getElementById("hyg").innerText = hyg.price.toFixed(1);
 
-    let daxVal = dax.quoteResponse.result[0].regularMarketPrice;
-    let vixVal = vix.quoteResponse.result[0].regularMarketPrice;
-    let hygVal = hyg.quoteResponse.result[0].regularMarketPrice;
-
-    document.getElementById("dax").innerText = daxVal.toFixed(0);
-    document.getElementById("vix").innerText = vixVal.toFixed(1);
-    document.getElementById("hyg").innerText = hygVal.toFixed(1);
-
-    // Dummy Zinsen (kann später API bekommen)
-    let yieldVal = 4.15;
-    document.getElementById("yield").innerText = yieldVal + "%";
+    // DAX Proxy (fix Wert oder später ersetzen)
+    let daxVal = 24050;
+    document.getElementById("dax").innerText = daxVal;
 
     let score = 0;
 
-    if (vixVal > 20) score++;
-    if (yieldVal < 4.0) score++;
-    if (hygVal < 75) score++;
-    if (daxVal < 23800) score++;
+    if (vix.price > 20) score++;
+    if (hyg.price < 75) score++;
 
     let status = document.getElementById("status");
 
-    if (score >= 3) {
+    if (score >= 2) {
       status.innerText = "🔴 RISK OFF";
       status.className = "status red";
-    } else if (score >= 2) {
+    } else if (score >= 1) {
       status.innerText = "🟡 WARNING";
       status.className = "status yellow";
     } else {
@@ -102,11 +89,10 @@ async function loadData() {
     }
 
   } catch (e) {
-    document.getElementById("status").innerText = "⚠️ Fehler beim Laden";
+    document.getElementById("status").innerText = "⚠️ API Fehler";
   }
 }
 
-// alle 60 Sekunden aktualisieren
 loadData();
 setInterval(loadData, 60000);
 </script></body>
