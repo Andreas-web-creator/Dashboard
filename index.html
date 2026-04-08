@@ -1,84 +1,44 @@
-<!DOCTYPE html><html lang="de">
-<head>
-<meta charset="UTF-8">
-<title>Macro Dashboard</title><style>
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  text-align: center;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin: 20px;
-}
-
-.card {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.value {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.status {
-  font-size: 36px;
-  margin-top: 20px;
-}
-
-.green { color: #22c55e; }
-.yellow { color: #eab308; }
-.red { color: #ef4444; }
-</style></head><body><h1>📊 Macro Risk Dashboard</h1><div class="grid">
-  <div class="card">
-    <h3>VIX</h3>
-    <div id="vix" class="value">--</div>
-  </div>  <div class="card">
-    <h3>Credit (HYG)</h3>
-    <div id="hyg" class="value">--</div>
-  </div>  <div class="card">
-    <h3>DAX (Manual)</h3>
-    <div id="dax" class="value">24050</div>
-  </div>  <div class="card">
-    <h3>Fear & Greed</h3>
-    <div id="sentiment" class="value">30</div>
-  </div>
-</div><div id="status" class="status">⏳ Loading...</div><script>
+<script>
 async function loadData() {
+  try {
+    const response = await fetch("DEIN_GOOGLE_SHEET_LINK");
+    const text = await response.text();
 
-  // 🔥 SIMULIERTE LIVE DATEN (funktioniert IMMER)
-  let vix = 16 + Math.random() * 3;
-  let hyg = 76 + Math.random() * 2;
+    const rows = text.split("\n");
 
-  document.getElementById("vix").innerText = vix.toFixed(1);
-  document.getElementById("hyg").innerText = hyg.toFixed(1);
+    let vix = rows[0].split(",")[1];
+    let hyg = rows[1].split(",")[1];
+    let dax = rows[2].split(",")[1];
+    let fear = rows[3].split(",")[1];
 
-  let score = 0;
+    document.getElementById("vix").innerText = vix;
+    document.getElementById("hyg").innerText = hyg;
+    document.getElementById("dax").innerText = dax;
+    document.getElementById("sentiment").innerText = fear;
 
-  if (vix > 20) score++;
-  if (hyg < 75) score++;
+    let score = 0;
 
-  let status = document.getElementById("status");
+    if (vix > 20) score++;
+    if (hyg < 75) score++;
 
-  if (score >= 2) {
-    status.innerText = "🔴 RISK OFF";
-    status.className = "status red";
-  } else if (score >= 1) {
-    status.innerText = "🟡 WARNING";
-    status.className = "status yellow";
-  } else {
-    status.innerText = "🟢 STABLE";
-    status.className = "status green";
+    let status = document.getElementById("status");
+
+    if (score >= 2) {
+      status.innerText = "🔴 RISK OFF";
+      status.className = "status red";
+    } else if (score >= 1) {
+      status.innerText = "🟡 WARNING";
+      status.className = "status yellow";
+    } else {
+      status.innerText = "🟢 STABLE";
+      status.className = "status green";
+    }
+
+  } catch (e) {
+    document.getElementById("status").innerText = "⚠️ Datenfehler";
   }
 }
 
 loadData();
-setInterval(loadData, 5000);
-</script></body>
-</html>
+setInterval(loadData, 60000);
+</script>
